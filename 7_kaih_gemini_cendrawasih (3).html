@@ -1,0 +1,2344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7 KAIH — GEMINI CENDRAWASIH</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            kaih: {
+              teal: '#45C6C0',
+              tealDark: '#267F7A',
+              greige: '#D6CEC1',
+              greigeLight: '#F1EDE6',
+              bg: '#F7F6F2',
+              text: '#303B38',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --bg-app: #F7F6F2;
+      --bg-card: #FFFFFF;
+      --bg-soft: #F1EDE6;
+      --border-soft: #D6CEC1;
+      --text-main: #303B38;
+      --accent: #45C6C0;
+      --accent-dark: #267F7A;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      transition: background-color 0.35s ease, color 0.35s ease;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .app-card {
+      background-color: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-soft);
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 20px rgba(48, 59, 56, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .flame-svg {
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes pulseGentle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .flame-active {
+      animation: pulseGentle 2.6s infinite ease-in-out;
+    }
+
+    /* Animasi Bendera & Intro Indonesia */
+    @keyframes waveFlag {
+      0%, 100% { transform: perspective(400px) rotateY(-4deg) skewY(0deg); }
+      50% { transform: perspective(400px) rotateY(4deg) skewY(1.5deg); }
+    }
+
+    .flag-wave {
+      animation: waveFlag 3.2s ease-in-out infinite;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-up {
+      animation: fadeInUp 0.7s ease-out forwards;
+    }
+
+    /* Scrollbar halus */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D6CEC1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-[#45C6C0]/20 selection:text-[#267F7A]">
+
+  <!-- Canvas Kembang Api Perayaan -->
+  <canvas id="fireworksCanvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+  <!-- Toast / Pesan Notifikasi Aplikasi (Pengganti alert) -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-[calc(100%-2rem)] pointer-events-none"></div>
+
+  <!-- =========================================================
+       1. LAYAR ANIMASI PEMBUKA INDONESIA & LAGU INDONESIA RAYA
+       ========================================================= -->
+  <div id="introScreen" class="fixed inset-0 z-40 flex flex-col items-center justify-between p-6 bg-gradient-to-b from-[#9E1B1E] via-[#C81E23] to-[#F7F6F2] text-center overflow-y-auto">
+    <div class="w-full max-w-3xl flex items-center justify-between pt-2">
+      <span class="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold tracking-wider uppercase backdrop-blur-sm">
+        Republik Indonesia • Papua Pegunungan
+      </span>
+      <button id="skipIntroBtn" type="button" class="px-4 py-2 rounded-full bg-white text-[#303B38] font-semibold text-xs sm:text-sm shadow-md hover:bg-[#F1EDE6] active:scale-95 transition">
+        Lewati Intro →
+      </button>
+    </div>
+
+    <div class="my-auto py-6 flex flex-col items-center max-w-xl animate-fade-up">
+      <!-- Bendera Merah Putih SVG -->
+      <div class="flag-wave w-44 sm:w-56 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/60 mb-6">
+        <div class="h-14 sm:h-16 bg-[#CE1126]"></div>
+        <div class="h-14 sm:h-16 bg-white"></div>
+      </div>
+
+      <!-- Siluet Garuda / Burung Cendrawasih Minimalis -->
+      <div class="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 text-[#267F7A] text-xs font-bold shadow-sm">
+        <span>🇮🇩 GERAKAN TUJUH KEBIASAAN ANAK INDONESIA HEBAT</span>
+      </div>
+
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-white drop-shadow-sm tracking-tight mb-2">
+        7 KAIH — GEMINI CENDRAWASIH
+      </h1>
+      <p class="text-white/95 text-sm sm:text-base max-w-md mb-6 leading-relaxed">
+        Membangun generasi Papua & Indonesia yang religius, sehat, cerdas, peduli, dan berkarakter hebat dari Lembah Baliem.
+      </p>
+
+      <!-- Tombol Masuk Aplikasi -->
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <button id="enterAppBtn" type="button" class="px-6 py-3 rounded-2xl bg-white hover:bg-[#F1EDE6] text-[#303B38] font-bold text-sm shadow-lg transition">
+          Login
+        </button>
+      </div>
+    </div>
+
+    <div class="w-full pb-2">
+      <p class="text-lg sm:text-2xl font-extrabold tracking-widest text-[#267F7A] uppercase">
+        DIRECTED BY GEMINI CENDRAWASIH
+      </p>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       2. LAYAR LOGIN / IDENTITAS SISWA GEMINI CENDRAWASIH
+       ========================================================= -->
+  <div id="loginScreen" class="hidden min-h-screen flex flex-col items-center justify-between p-4 sm:p-6">
+    <div class="w-full max-w-md flex justify-end">
+      <button type="button" onclick="replayIntro()" class="text-xs font-semibold text-[#267F7A] hover:underline px-3 py-1.5 rounded-xl bg-white/80 border border-[#D6CEC1]">
+        🇮🇩 Putar Ulang Intro Indonesia
+      </button>
+    </div>
+
+    <div class="w-full max-w-md app-card p-6 sm:p-8 my-auto">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-12 h-12 rounded-2xl bg-[#45C6C0]/15 text-[#267F7A] flex items-center justify-center font-extrabold text-xl border border-[#45C6C0]/30">
+          7K
+        </div>
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-[#267F7A]">GEMINI CENDRAWASIH</span>
+          <h2 class="text-2xl font-extrabold text-[#303B38]">7 KAIH</h2>
+        </div>
+      </div>
+
+      <p class="text-sm text-[#303B38]/80 mb-6 leading-relaxed">
+        Selamat datang! Silakan masukkan nama lengkap dan kelasmu untuk mulai mencatat kebiasaan harian Anak Indonesia Hebat.
+      </p>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="studentNameInput" class="block text-xs font-bold uppercase tracking-wider text-[#303B38]/75 mb-1.5">
+            Nama Lengkap Siswa
+          </label>
+          <input id="studentNameInput" type="text" required placeholder="Nama Anda"
+            class="w-full px-4 py-3 rounded-xl bg-[#F7F6F2] border border-[#D6CEC1] text-[#303B38] font-medium focus:outline-none focus:border-[#45C6C0] focus:ring-2 focus:ring-[#45C6C0]/20" />
+        </div>
+
+        <div>
+          <label for="studentClassInput" class="block text-xs font-bold uppercase tracking-wider text-[#303B38]/75 mb-1.5">
+            Kelas
+          </label>
+          <input id="studentClassInput" type="text" required placeholder="Kelas Anda"
+            class="w-full px-4 py-3 rounded-xl bg-[#F7F6F2] border border-[#D6CEC1] text-[#303B38] font-medium focus:outline-none focus:border-[#45C6C0] focus:ring-2 focus:ring-[#45C6C0]/20" />
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-[#45C6C0] hover:bg-[#267F7A] text-white font-bold text-base shadow-sm transition active:scale-[0.99]">
+          Mulai Pantau Kebiasaan
+        </button>
+      </form>
+    </div>
+
+    <footer class="w-full text-center py-4">
+      <p class="text-xl sm:text-2xl font-extrabold tracking-widest text-[#267F7A] uppercase">
+        DIRECTED BY GEMINI CENDRAWASIH
+      </p>
+    </footer>
+  </div>
+
+  <!-- =========================================================
+       3. DASHBOARD UTAMA APLIKASI 7 KAIH
+       ========================================================= -->
+  <div id="mainApp" class="hidden min-h-screen flex flex-col pb-24 md:pb-8">
+    <!-- Header Desktop & Mobile -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#D6CEC1]">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-[#45C6C0] text-white flex items-center justify-center font-extrabold text-base shrink-0 shadow-sm">
+            7K
+          </div>
+          <div class="truncate">
+            <h1 class="text-base sm:text-lg font-extrabold text-[#303B38] leading-tight truncate">
+              7 KAIH — GEMINI CENDRAWASIH
+            </h1>
+            <p class="text-[11px] font-semibold text-[#267F7A] truncate" id="headerClockWIT">
+              Memuat Waktu WIT...
+            </p>
+          </div>
+        </div>
+
+        <!-- Navigasi Desktop -->
+        <nav class="hidden md:flex items-center gap-1.5 bg-[#F1EDE6] p-1 rounded-xl border border-[#D6CEC1]">
+          <button type="button" data-nav="beranda" class="nav-btn px-3.5 py-2 rounded-lg text-sm font-bold transition">
+            Beranda
+          </button>
+          <button type="button" data-nav="kebiasaan" class="nav-btn px-3.5 py-2 rounded-lg text-sm font-bold transition">
+            Kebiasaan Hari Ini
+          </button>
+          <button type="button" data-nav="perkembangan" class="nav-btn px-3.5 py-2 rounded-lg text-sm font-bold transition">
+            Perkembanganku
+          </button>
+          <button type="button" data-nav="analisis" class="nav-btn px-3.5 py-2 rounded-lg text-sm font-bold transition">
+            Dashboard Analisis
+          </button>
+          <button type="button" data-nav="profil" class="nav-btn px-3.5 py-2 rounded-lg text-sm font-bold transition">
+            Profil & Peringkat
+          </button>
+        </nav>
+
+        <!-- Tombol Cepat Tema, Notif & Profil Mini -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="openModal('notifModal')" title="Pengingat Notifikasi" class="p-2.5 rounded-xl bg-[#F1EDE6] hover:bg-[#D6CEC1]/50 text-[#303B38] border border-[#D6CEC1] transition relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span id="notifDot" class="hidden absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#45C6C0]"></span>
+          </button>
+          <button type="button" onclick="openModal('themeModal')" title="Ubah Tema & Latar" class="p-2.5 rounded-xl bg-[#F1EDE6] hover:bg-[#D6CEC1]/50 text-[#303B38] border border-[#D6CEC1] transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+            </svg>
+          </button>
+          <button type="button" onclick="switchTab('profil')" class="w-10 h-10 rounded-full overflow-hidden border-2 border-[#45C6C0] bg-[#F1EDE6] shrink-0">
+            <img id="headerAvatar" src="" alt="Foto Profil" class="w-full h-full object-cover" />
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-6 space-y-6">
+
+      <!-- =====================================================
+           TAB 1: BERANDA SISWA
+           ===================================================== -->
+      <section id="tab-beranda" class="tab-section space-y-6">
+        <!-- Kartu Sapaan & Jam Live WIT -->
+        <div class="app-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#45C6C0]/15 text-[#267F7A] text-xs font-bold">
+              <span>GEMINI CENDRAWASIH</span>
+              <span>•</span>
+              <span id="berandaClassBadge">Kelas -</span>
+            </div>
+            <h2 id="greetingTitle" class="text-2xl sm:text-3xl font-extrabold text-[#303B38]">
+              Selamat Pagi, Siswa!
+            </h2>
+            <p id="berandaDateText" class="text-sm text-[#303B38]/75 font-medium">
+              Memuat tanggal...
+            </p>
+          </div>
+
+          <!-- Kotak Jam Live WIT (Independen dari jam sistem menggunakan sinkronisasi UTC+9 / server) -->
+          <div class="bg-[#F1EDE6] border border-[#D6CEC1] rounded-2xl px-5 py-4 text-left md:text-right shrink-0">
+            <div class="flex items-center md:justify-end gap-1.5 text-xs font-bold uppercase tracking-wider text-[#267F7A]">
+              <span class="w-2 h-2 rounded-full bg-[#45C6C0] animate-ping"></span>
+              <span>Waktu Indonesia Timur (WIT)</span>
+            </div>
+            <div id="liveClockWIT" class="text-2xl sm:text-3xl font-extrabold text-[#303B38] tabular-nums mt-0.5">
+              00:00:00 WIT
+            </div>
+            <p class="text-[11px] text-[#303B38]/65 mt-0.5">Zona Waktu Papua (UTC+9)</p>
+          </div>
+        </div>
+
+        <!-- Grid Streak Api & Progress Harian -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Kartu Streak Aktif dengan Ikon Api Berubah Warna -->
+          <div class="app-card p-6 flex items-center gap-5">
+            <div id="flameContainer" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#F1EDE6] border border-[#D6CEC1] flex items-center justify-center shrink-0 relative">
+              <!-- SVG Api Utama -->
+              <svg id="streakFlameSvg" class="w-14 h-14 sm:w-16 sm:h-16 flame-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path id="flameOuter" d="M32 6C32 6 48 20 48 36C48 47.0457 40.8366 56 32 56C23.1634 56 16 47.0457 16 36C16 29.5 19.5 23.5 23 19.5C22.5 24.5 25 27.5 27.5 27.5C25.5 20.5 28 12 32 6Z" fill="#B8B4AC"/>
+                <path id="flameInner" d="M32 25C32 25 40 32.5 40 40.5C40 46.299 36.4183 51 32 51C27.5817 51 24 46.299 24 40.5C24 36.5 26.5 32.5 29 30C28.8 33 30.2 34.8 31.5 34.8C30.5 31 31 27.5 32 25Z" fill="#D6CEC1"/>
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-[#303B38]/60">Streak Konsistensi</span>
+              <div class="flex items-baseline gap-2">
+                <span id="berandaStreakCount" class="text-3xl sm:text-4xl font-extrabold text-[#303B38]">0</span>
+                <span class="text-sm font-bold text-[#303B38]/75">Hari</span>
+              </div>
+              <p id="berandaStreakLabel" class="text-sm font-semibold text-[#267F7A]">
+                Mulai membangun kebiasaan
+              </p>
+              <p class="text-xs text-[#303B38]/65">
+                Rekor terpanjang: <strong id="berandaBestStreak">0 hari</strong>
+              </p>
+            </div>
+          </div>
+
+          <!-- Kartu Progress Hari Ini -->
+          <div class="app-card p-6 flex flex-col justify-between gap-4">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider text-[#303B38]/60">Capaian Hari Ini</span>
+                <span id="berandaPointsTodayBadge" class="px-2.5 py-0.5 rounded-full bg-[#45C6C0]/15 text-[#267F7A] text-xs font-bold">
+                  +0 Poin Hari Ini
+                </span>
+              </div>
+              <div class="flex items-baseline justify-between mt-1">
+                <h3 class="text-2xl sm:text-3xl font-extrabold text-[#303B38]">
+                  <span id="berandaDoneCount">0</span> dari 7
+                </h3>
+                <span id="berandaPercentText" class="text-sm font-bold text-[#267F7A]">0%</span>
+              </div>
+
+              <!-- Progress Bar Harian -->
+              <div class="w-full h-3.5 bg-[#F1EDE6] rounded-full overflow-hidden mt-3 border border-[#D6CEC1]/60">
+                <div id="berandaProgressBar" class="h-full bg-[#45C6C0] rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <button type="button" onclick="switchTab('kebiasaan')" class="w-full py-3.5 px-5 rounded-xl bg-[#45C6C0] hover:bg-[#267F7A] text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2 active:scale-[0.99]">
+              <span>Isi Kebiasaan Hari Ini</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Ringkasan Perkembangan Kebiasaan -->
+        <div class="app-card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-base sm:text-lg font-extrabold text-[#303B38]">Ringkasan Kebiasaan Hari Ini</h3>
+              <p class="text-xs text-[#303B38]/70">Status ketujuh kebiasaan anak Indonesia hebat hari ini</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-[#303B38]/65 block">Total Poin Bulan Ini</span>
+              <span id="berandaMonthlyPoints" class="text-lg font-extrabold text-[#267F7A]">0 Poin</span>
+            </div>
+          </div>
+
+          <div id="berandaSummaryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Diisi otomatis via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           TAB 2: FORMULIR KEBIASAAN HARI INI
+           ===================================================== -->
+      <section id="tab-kebiasaan" class="tab-section hidden space-y-5">
+        <div class="app-card p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#D6CEC1]">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-[#267F7A]">Formulir Harian • 7 KAIH</span>
+              <h2 class="text-xl sm:text-2xl font-extrabold text-[#303B38] mt-0.5">Kebiasaan Hari Ini</h2>
+              <p id="formDateSubtitle" class="text-xs sm:text-sm text-[#303B38]/75 mt-0.5">Tanggal: -</p>
+            </div>
+            <div class="bg-[#F1EDE6] px-4 py-2.5 rounded-xl border border-[#D6CEC1] text-xs space-y-0.5">
+              <p class="font-bold text-[#303B38]">Aturan Poin Kebiasaan:</p>
+              <p class="text-[#303B38]/80">✓ Centang saja = <strong>1 poin</strong></p>
+              <p class="text-[#303B38]/80">✓ Centang + Keterangan = <strong>2 poin</strong></p>
+              <p class="text-[#303B38]/80">✓ Centang + Keterangan + Foto = <strong>3 poin</strong></p>
+            </div>
+          </div>
+
+          <!-- Daftar 7 Kebiasaan -->
+          <div id="habitsFormList" class="divide-y divide-[#D6CEC1]/70 mt-2">
+            <!-- Diisi dinamis oleh JS -->
+          </div>
+
+          <!-- Tombol Simpan Hari Ini -->
+          <div class="pt-6 mt-4 border-t border-[#D6CEC1] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-sm text-[#303B38]/80">
+              Status hari ini: <strong id="formLiveStatusText" class="text-[#267F7A]">0 dari 7 selesai</strong>
+              <span class="mx-1.5">•</span>
+              Estimasi: <strong id="formLivePointsText" class="text-[#303B38]">0 Poin</strong>
+            </div>
+            <button id="saveTodayBtn" type="button" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#45C6C0] hover:bg-[#267F7A] text-white font-extrabold text-base shadow-md transition active:scale-[0.98]">
+              Simpan Hari Ini
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           TAB 3: PERKEMBANGANKU (GRAFIK, KALENDER & RIWAYAT)
+           ===================================================== -->
+      <section id="tab-perkembangan" class="tab-section hidden space-y-6">
+        <!-- 3 Metrik Utama -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="app-card p-5">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#303B38]/60">Streak Saat Ini</span>
+            <p class="text-3xl font-extrabold text-[#267F7A] mt-1"><span id="progCurrentStreak">0</span> Hari</p>
+            <p class="text-xs text-[#303B38]/70 mt-1">Konsisten menyelesaikan 7/7</p>
+          </div>
+          <div class="app-card p-5">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#303B38]/60">Rekor Streak Terpanjang</span>
+            <p class="text-3xl font-extrabold text-[#303B38] mt-1"><span id="progBestStreak">0</span> Hari</p>
+            <p class="text-xs text-[#303B38]/70 mt-1">Pencapaian terbaikmu</p>
+          </div>
+          <div class="app-card p-5">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#303B38]/60">Total Hari Lengkap (7/7)</span>
+            <p class="text-3xl font-extrabold text-[#45C6C0] mt-1"><span id="progTotalCompleteDays">0</span> Hari</p>
+            <p class="text-xs text-[#303B38]/70 mt-1">Sepanjang penggunaan aplikasi</p>
+          </div>
+        </div>
+
+        <!-- Grafik Perkembangan Siswa (7 Hari Terakhir) -->
+        <div class="app-card p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="text-lg font-extrabold text-[#303B38]">Grafik Perkembangan Kebiasaan</h3>
+              <p class="text-xs text-[#303B38]/70">Jumlah kebiasaan selesai per hari dalam 7 hari terakhir (data nyata)</p>
+            </div>
+            <span class="text-xs font-bold px-3 py-1 rounded-full bg-[#F1EDE6] text-[#267F7A] border border-[#D6CEC1]">
+              Target Harian: 7 Kebiasaan
+            </span>
+          </div>
+          <div class="w-full overflow-x-auto">
+            <canvas id="progressChartCanvas" class="w-full h-56 block"></canvas>
+          </div>
+        </div>
+
+        <!-- Kalender Sederhana & Persentase Per Kebiasaan -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Kalender Sederhana Bulan Ini -->
+          <div class="app-card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-base font-extrabold text-[#303B38]">Kalender Kebiasaan</h3>
+                <p id="calendarMonthLabel" class="text-xs text-[#303B38]/70">Bulan Ini</p>
+              </div>
+              <div class="flex items-center gap-3 text-[11px] font-semibold">
+                <span class="flex items-center gap-1"><i class="w-2.5 h-2.5 rounded-full bg-[#45C6C0] inline-block"></i> Lengkap (7/7)</span>
+                <span class="flex items-center gap-1"><i class="w-2.5 h-2.5 rounded-full bg-[#D6CEC1] inline-block"></i> Sebagian</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-[#303B38]/60 mb-2">
+              <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+            </div>
+            <div id="simpleCalendarGrid" class="grid grid-cols-7 gap-1.5">
+              <!-- Diisi JS -->
+            </div>
+          </div>
+
+          <!-- Persentase Penyelesaian Per Kebiasaan -->
+          <div class="app-card p-6">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="text-base font-extrabold text-[#303B38]">Persentase Tiap Kebiasaan</h3>
+                <p class="text-xs text-[#303B38]/70">Berdasarkan catatan yang tersimpan</p>
+              </div>
+              <select id="periodFilterSelect" class="px-3 py-1.5 rounded-xl bg-[#F1EDE6] border border-[#D6CEC1] text-xs font-bold text-[#303B38] focus:outline-none">
+                <option value="7">7 Hari Terakhir</option>
+                <option value="30" selected>30 Hari Terakhir</option>
+                <option value="all">Semua Waktu</option>
+              </select>
+            </div>
+            <div id="habitPercentageList" class="space-y-3">
+              <!-- Diisi JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Riwayat Pengisian Harian -->
+        <div class="app-card p-6">
+          <h3 class="text-base font-extrabold text-[#303B38] mb-1">Riwayat Pengisian Harian</h3>
+          <p class="text-xs text-[#303B38]/70 mb-4">Catatan harian yang telah kamu simpan</p>
+          <div id="historyListContainer" class="space-y-3">
+            <!-- Diisi JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           TAB 4: DASHBOARD ANALISIS KEBIASAAN & PERINGKAT
+           ===================================================== -->
+      <section id="tab-analisis" class="tab-section hidden space-y-6">
+        <!-- Header Dashboard Analisis -->
+        <div class="app-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#267F7A]">Analitik Real-Time • GEMINI CENDRAWASIH</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-[#303B38] mt-0.5">Dashboard Analisis 7 KAIH</h2>
+            <p class="text-xs sm:text-sm text-[#303B38]/75 mt-0.5">
+              Evaluasi tingkat kedisiplinan, kualitas bukti poin, dan posisi peringkatmu bulan ini.
+            </p>
+          </div>
+          <button type="button" onclick="renderAnalisisDashboard()" class="px-4 py-2.5 rounded-xl bg-[#45C6C0] hover:bg-[#267F7A] text-white font-bold text-xs shadow-xs transition shrink-0">
+            ↻ Perbarui Analisis
+          </button>
+        </div>
+
+        <!-- 4 Kartu KPI Analisis -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="app-card p-5">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#303B38]/60">Indeks Konsistensi</span>
+            <p id="anaConsistencyScore" class="text-2xl sm:text-3xl font-extrabold text-[#267F7A] mt-1">0%</p>
+            <p id="anaConsistencyLabel" class="text-[11px] text-[#303B38]/70 mt-1">Belum ada catatan</p>
+          </div>
+          <div class="app-card p-5">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#303B38]/60">Rata-rata Harian</span>
+            <p id="anaAvgHabits" class="text-2xl sm:text-3xl font-extrabold text-[#303B38] mt-1">0 / 7</p>
+            <p class="text-[11px] text-[#303B38]/70 mt-1">Kebiasaan per hari tercatat</p>
+          </div>
+          <div class="app-card p-5">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#303B38]/60">Kebiasaan Terkuat</span>
+            <p id="anaStrongestHabit" class="text-base sm:text-lg font-extrabold text-[#267F7A] mt-1 truncate">-</p>
+            <p id="anaStrongestPct" class="text-[11px] text-[#303B38]/70 mt-1">0% tingkat penyelesaian</p>
+          </div>
+          <div class="app-card p-5">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#303B38]/60">Perlu Ditingkatkan</span>
+            <p id="anaWeakestHabit" class="text-base sm:text-lg font-extrabold text-[#303B38] mt-1 truncate">-</p>
+            <p id="anaWeakestPct" class="text-[11px] text-[#303B38]/70 mt-1">0% tingkat penyelesaian</p>
+          </div>
+        </div>
+
+        <!-- Grafik Analisis & Distribusi Kualitas Poin -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Grafik Distribusi Poin per Kebiasaan -->
+          <div class="app-card p-6 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-base font-extrabold text-[#303B38]">Analisis Kontribusi Poin Per Kebiasaan</h3>
+                <p class="text-xs text-[#303B38]/70">Total poin yang dikumpulkan dari setiap kebiasaan bulan ini</p>
+              </div>
+              <span id="anaTotalMonthPtsBadge" class="px-3 py-1 rounded-full bg-[#45C6C0]/15 text-[#267F7A] text-xs font-bold">
+                0 Poin
+              </span>
+            </div>
+            <div class="w-full overflow-x-auto">
+              <canvas id="analysisHabitChart" class="w-full h-60 block"></canvas>
+            </div>
+          </div>
+
+          <!-- Komposisi Kualitas Pengisian & Posisi Kelas -->
+          <div class="app-card p-6 flex flex-col justify-between space-y-5">
+            <div>
+              <h3 class="text-base font-extrabold text-[#303B38]">Kualitas Pengisian Bukti</h3>
+              <p class="text-xs text-[#303B38]/70 mb-4">Rincian tingkat kelengkapan bukti kebiasaanmu</p>
+
+              <div id="anaQualityBreakdown" class="space-y-3">
+                <!-- Diisi otomatis via JS -->
+              </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-[#F1EDE6] border border-[#D6CEC1] space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#267F7A]">Analisis Posisi Klasemen</span>
+              <p id="anaRankSummary" class="text-xs font-semibold text-[#303B38] leading-relaxed">
+                Menghitung posisi peringkatmu di GEMINI CENDRAWASIH...
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rekomendasi Otomatis Berbasis Data -->
+        <div class="app-card p-6">
+          <h3 class="text-base font-extrabold text-[#303B38] mb-2">Rekomendasi Peningkatan Kebiasaan</h3>
+          <div id="anaRecommendationsList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Diisi JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           TAB 5: PROFIL SISWA & PERINGKAT POIN BULANAN
+           ===================================================== -->
+      <section id="tab-profil" class="tab-section hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Kartu Profil & Foto Galeri / Rekomendasi 2 Gender -->
+          <div class="app-card p-6 lg:col-span-1 space-y-5">
+            <div class="flex flex-col items-center text-center">
+              <div class="relative w-24 h-24 rounded-full overflow-hidden border-4 border-[#45C6C0] bg-[#F1EDE6] shadow-sm">
+                <img id="profileMainAvatar" src="" alt="Avatar Siswa" class="w-full h-full object-cover" />
+              </div>
+              <h3 id="profileDisplayName" class="text-lg font-extrabold text-[#303B38] mt-3">-</h3>
+              <p id="profileDisplayClass" class="text-xs font-bold text-[#267F7A] bg-[#45C6C0]/15 px-3 py-1 rounded-full mt-1">-</p>
+            </div>
+
+            <!-- Upload Foto Profil dari Galeri -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-[#303B38]/70">
+                Ubah Foto Profil
+              </label>
+              <label class="w-full py-2.5 px-4 rounded-xl bg-[#F1EDE6] hover:bg-[#D6CEC1]/60 border border-[#D6CEC1] text-xs font-bold text-[#303B38] flex items-center justify-center gap-2 cursor-pointer transition">
+                <span>📷 Pilih Foto dari Galeri</span>
+                <input id="profileGalleryInput" type="file" accept="image/*" class="hidden" />
+              </label>
+            </div>
+
+            <!-- Rekomendasi Foto Profil 2 Gender -->
+            <div class="space-y-2">
+              <span class="block text-xs font-bold uppercase tracking-wider text-[#303B38]/70">
+                Rekomendasi Avatar (Putra & Putri)
+              </span>
+              <div class="grid grid-cols-2 gap-3">
+                <button type="button" onclick="selectPresetAvatar('putra')" class="p-2.5 rounded-xl border border-[#D6CEC1] hover:border-[#45C6C0] bg-[#F7F6F2] flex flex-col items-center gap-1.5 transition">
+                  <img id="presetPutraImg" src="" alt="Siswa Putra" class="w-12 h-12 rounded-full object-cover border border-[#D6CEC1]" />
+                  <span class="text-xs font-bold text-[#303B38]">Siswa Putra</span>
+                </button>
+                <button type="button" onclick="selectPresetAvatar('putri')" class="p-2.5 rounded-xl border border-[#D6CEC1] hover:border-[#45C6C0] bg-[#F7F6F2] flex flex-col items-center gap-1.5 transition">
+                  <img id="presetPutriImg" src="" alt="Siswi Putri" class="w-12 h-12 rounded-full object-cover border border-[#D6CEC1]" />
+                  <span class="text-xs font-bold text-[#303B38]">Siswi Putri</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Edit Nama & Kelas -->
+            <form id="editAccountForm" class="space-y-3 pt-3 border-t border-[#D6CEC1]">
+              <div>
+                <label class="block text-xs font-bold text-[#303B38]/75 mb-1">Nama Lengkap</label>
+                <input id="editNameInput" type="text" required class="w-full px-3.5 py-2 rounded-xl bg-[#F7F6F2] border border-[#D6CEC1] text-sm font-medium focus:outline-none focus:border-[#45C6C0]" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-[#303B38]/75 mb-1">Kelas</label>
+                <input id="editClassInput" type="text" required class="w-full px-3.5 py-2 rounded-xl bg-[#F7F6F2] border border-[#D6CEC1] text-sm font-medium focus:outline-none focus:border-[#45C6C0]" />
+              </div>
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-[#45C6C0] hover:bg-[#267F7A] text-white font-bold text-sm transition">
+                Simpan Perubahan Profil
+              </button>
+              <button type="button" onclick="logoutAccount()" class="w-full py-2 rounded-xl bg-transparent hover:bg-red-50 text-red-600 font-semibold text-xs transition">
+                Ganti Akun / Keluar
+              </button>
+            </form>
+          </div>
+
+          <!-- Peringkat Poin Seluruh Pengguna (Reset 1 Bulan Sekali) -->
+          <div class="app-card p-6 lg:col-span-2 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#D6CEC1]">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-[#267F7A]">Klasemen GEMINI CENDRAWASIH</span>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-xl font-extrabold text-[#303B38]">Peringkat Poin Kebiasaan</h3>
+                    <button type="button" onclick="renderLeaderboard()" title="Segarkan Peringkat" class="px-2.5 py-1 rounded-lg bg-[#F1EDE6] hover:bg-[#D6CEC1]/60 text-[11px] font-bold text-[#267F7A] border border-[#D6CEC1] transition">
+                      ↻ Segarkan
+                    </button>
+                  </div>
+                  <p class="text-xs text-[#303B38]/70 mt-0.5">
+                    Periode: <strong id="leaderboardMonthBadge">-</strong> (Reset otomatis setiap tanggal 1)
+                  </p>
+                </div>
+                <div class="bg-[#F1EDE6] px-3.5 py-2 rounded-xl border border-[#D6CEC1] text-right">
+                  <span class="text-[11px] text-[#303B38]/65 block">Poin Kamu Bulan Ini</span>
+                  <span id="leaderboardMyPoints" class="text-base font-extrabold text-[#267F7A]">0 Poin</span>
+                </div>
+              </div>
+
+              <!-- Daftar Peringkat -->
+              <div id="leaderboardList" class="divide-y divide-[#D6CEC1]/60 mt-2">
+                <!-- Diisi JS -->
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-[#D6CEC1] text-xs text-[#303B38]/70 flex items-center justify-between">
+              <span>Terhubung langsung ke Google Sheets Peringkat</span>
+              <span class="font-bold text-[#267F7A]">1–3 Poin / Kebiasaan</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer DIRECTED BY GEMINI CENDRAWASIH di seluruh menu -->
+    <footer class="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-8 pb-4 text-center">
+      <p class="text-lg sm:text-2xl font-extrabold tracking-widest text-[#267F7A] uppercase">
+        DIRECTED BY GEMINI CENDRAWASIH
+      </p>
+    </footer>
+
+    <!-- Navigasi Bawah Mobile -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-[#D6CEC1] px-1.5 py-1.5 flex items-center justify-around">
+      <button type="button" data-nav="beranda" class="nav-btn-mobile flex flex-col items-center py-1.5 px-2.5 rounded-xl text-[11px] font-bold transition">
+        <span class="text-base mb-0.5">🏠</span>
+        <span>Beranda</span>
+      </button>
+      <button type="button" data-nav="kebiasaan" class="nav-btn-mobile flex flex-col items-center py-1.5 px-2.5 rounded-xl text-[11px] font-bold transition">
+        <span class="text-base mb-0.5">✅</span>
+        <span>Kebiasaan</span>
+      </button>
+      <button type="button" data-nav="perkembangan" class="nav-btn-mobile flex flex-col items-center py-1.5 px-2.5 rounded-xl text-[11px] font-bold transition">
+        <span class="text-base mb-0.5">📊</span>
+        <span>Progres</span>
+      </button>
+      <button type="button" data-nav="analisis" class="nav-btn-mobile flex flex-col items-center py-1.5 px-2.5 rounded-xl text-[11px] font-bold transition">
+        <span class="text-base mb-0.5">📈</span>
+        <span>Analisis</span>
+      </button>
+      <button type="button" data-nav="profil" class="nav-btn-mobile flex flex-col items-center py-1.5 px-2.5 rounded-xl text-[11px] font-bold transition">
+        <span class="text-base mb-0.5">🏆</span>
+        <span>Profil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- =========================================================
+       MODAL 1: UBAH TEMA / LATAR BELAKANG (TERMASUK DARI GALERI)
+       ========================================================= -->
+  <div id="themeModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white border border-[#D6CEC1] rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[#D6CEC1] pb-3">
+        <h3 class="text-lg font-extrabold text-[#303B38]">Ubah Tema & Latar Belakang</h3>
+        <button type="button" onclick="closeModal('themeModal')" class="w-8 h-8 rounded-full bg-[#F1EDE6] text-[#303B38] font-bold hover:bg-[#D6CEC1]">✕</button>
+      </div>
+
+      <div class="space-y-2">
+        <span class="block text-xs font-bold uppercase tracking-wider text-[#303B38]/70">Pilih Warna Latar</span>
+        <div class="grid grid-cols-4 gap-2.5">
+          <button type="button" onclick="applyPresetTheme('#F7F6F2')" class="h-12 rounded-xl border-2 border-[#D6CEC1] bg-[#F7F6F2] text-[10px] font-bold text-[#303B38]">Krem Hangat</button>
+          <button type="button" onclick="applyPresetTheme('#E6F6F5')" class="h-12 rounded-xl border-2 border-[#45C6C0] bg-[#E6F6F5] text-[10px] font-bold text-[#267F7A]">Turquoise</button>
+          <button type="button" onclick="applyPresetTheme('#F1EDE6')" class="h-12 rounded-xl border-2 border-[#D6CEC1] bg-[#F1EDE6] text-[10px] font-bold text-[#303B38]">Greige</button>
+          <button type="button" onclick="applyPresetTheme('#E9EEF2')" class="h-12 rounded-xl border-2 border-[#CBD5E1] bg-[#E9EEF2] text-[10px] font-bold text-[#303B38]">Langit Pagi</button>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <span class="block text-xs font-bold uppercase tracking-wider text-[#303B38]/70">Atau Ambil Gambar dari Galeri</span>
+        <label class="w-full py-3 px-4 rounded-xl bg-[#45C6C0]/15 hover:bg-[#45C6C0]/25 border border-dashed border-[#267F7A] text-xs font-bold text-[#267F7A] flex items-center justify-center gap-2 cursor-pointer transition">
+          <span>🖼️ Unggah Foto Latar dari Galeri</span>
+          <input id="bgGalleryInput" type="file" accept="image/*" class="hidden" />
+        </label>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <button type="button" onclick="resetTheme()" class="text-xs font-bold text-red-600 hover:underline">Reset ke Bawaan</button>
+        <button type="button" onclick="closeModal('themeModal')" class="px-5 py-2.5 rounded-xl bg-[#45C6C0] text-white font-bold text-xs">Selesai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 2: PENGINGAT / NOTIFIKASI HARIAN
+       ========================================================= -->
+  <div id="notifModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white border border-[#D6CEC1] rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[#D6CEC1] pb-3">
+        <h3 class="text-lg font-extrabold text-[#303B38]">Pengingat Kebiasaan (WIT)</h3>
+        <button type="button" onclick="closeModal('notifModal')" class="w-8 h-8 rounded-full bg-[#F1EDE6] text-[#303B38] font-bold hover:bg-[#D6CEC1]">✕</button>
+      </div>
+
+      <p class="text-xs text-[#303B38]/80 leading-relaxed">
+        Aktifkan pengingat harian agar kamu tidak lupa mengisi 7 Kebiasaan Anak Indonesia Hebat tepat waktu sebelum hari berganti.
+      </p>
+
+      <div class="space-y-3">
+        <label class="flex items-center justify-between p-3.5 rounded-xl bg-[#F7F6F2] border border-[#D6CEC1] cursor-pointer">
+          <span class="text-sm font-bold text-[#303B38]">Aktifkan Pengingat Harian</span>
+          <input id="notifEnabledToggle" type="checkbox" class="w-5 h-5 accent-[#45C6C0]" />
+        </label>
+
+        <div>
+          <label class="block text-xs font-bold text-[#303B38]/75 mb-1">Jam Pengingat (Waktu WIT)</label>
+          <input id="notifTimeInput" type="time" value="19:30" class="w-full px-4 py-2.5 rounded-xl bg-[#F7F6F2] border border-[#D6CEC1] text-sm font-bold text-[#303B38]" />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="testReminderSound()" class="px-4 py-2.5 rounded-xl bg-[#F1EDE6] text-[#303B38] font-bold text-xs">Uji Pengingat</button>
+        <button type="button" onclick="saveNotifSettings()" class="px-5 py-2.5 rounded-xl bg-[#45C6C0] hover:bg-[#267F7A] text-white font-bold text-xs">Simpan Pengingat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       SCRIPT LOGIKA APLIKASI 7 KAIH — GEMINI CENDRAWASIH
+       ========================================================= -->
+  <script>
+    // =========================================================
+    // 0. KONEKSI GOOGLE SPREADSHEETS (APPS SCRIPT WEB APP)
+    // =========================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxDiq6Fvcl3Uz4Xi_Nqwjkv6CmCe8WsndZ050kEH5idZ52bbI05giRWeotlPD_adk0/exec";
+
+    // Kirim Nama, Kelas, dan Total Poin saat menekan "Simpan Hari Ini"
+    async function kirimPoinKeSpreadsheet(nama, kelas, totalPoin) {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nama: nama,
+          kelas: kelas,
+          total_poin: totalPoin
+        })
+      });
+    }
+
+    // Ambil data Papan Peringkat (Nama, Kelas, Total Poin)
+    async function muatPeringkatSpreadsheet() {
+      const response = await fetch(SCRIPT_URL);
+      const dataPeringkat = await response.json();
+      // Hasil berupa array: [{ nama: "...", kelas: "...", total_poin: 45 }, ...]
+      return dataPeringkat;
+    }
+
+    // =========================================================
+    // 1. DATA KONSTANTA 7 KEBIASAAN ANAK INDONESIA HEBAT
+    // =========================================================
+    const HABITS_CONFIG = [
+      {
+        id: 'bangun_pagi',
+        name: 'Bangun Pagi',
+        timeRule: '04.30 – 06.00 WIT',
+        icon: '🌅',
+        allowNoteAndPhoto: false,
+        desc: 'Bangun pagi tepat waktu dengan semangat dan merapikan tempat tidur.'
+      },
+      {
+        id: 'beribadah',
+        name: 'Beribadah',
+        timeRule: 'Sesuai Waktu Ibadah (05.00 – 21.00 WIT)',
+        icon: '🤲',
+        allowNoteAndPhoto: true,
+        desc: 'Melaksanakan ibadah dan berdoa sesuai agama serta kepercayaan masing-masing.'
+      },
+      {
+        id: 'berolahraga',
+        name: 'Berolahraga',
+        timeRule: '06.00 – 07.30 WIT / 15.30 – 17.30 WIT',
+        icon: '🏃',
+        allowNoteAndPhoto: true,
+        desc: 'Melakukan aktivitas fisik, senam, atau olahraga rutin untuk kebugaran tubuh.'
+      },
+      {
+        id: 'makan_sehat',
+        name: 'Makan Sehat dan Bergizi',
+        timeRule: '06.30, 12.30 & 18.30 WIT',
+        icon: '🥗',
+        allowNoteAndPhoto: true,
+        desc: 'Mengonsumsi makanan bergizi seimbang, sayur, buah, dan air putih cukup.'
+      },
+      {
+        id: 'gemar_belajar',
+        name: 'Gemar Belajar',
+        timeRule: '07.30 – 14.00 WIT & 19.00 – 20.30 WIT',
+        icon: '📚',
+        allowNoteAndPhoto: true,
+        desc: 'Belajar di sekolah maupun mengulang pelajaran/membaca buku di rumah.'
+      },
+      {
+        id: 'bermasyarakat',
+        name: 'Bermasyarakat',
+        timeRule: '15.00 – 18.00 WIT',
+        icon: '🤝',
+        allowNoteAndPhoto: true,
+        desc: 'Membantu orang tua, bergotong royong, dan bersikap santun kepada sesama.'
+      },
+      {
+        id: 'tidur_cepat',
+        name: 'Tidur Lebih Cepat',
+        timeRule: 'Maksimal 21.30 WIT',
+        icon: '😴',
+        allowNoteAndPhoto: false,
+        desc: 'Beristirahat malam lebih awal agar tubuh bugar untuk bangun pagi esok hari.'
+      }
+    ];
+
+    // Avatar Rekomendasi 2 Gender (SVG Data URI ringan & tajam)
+    const AVATAR_PRESETS = {
+      putra: "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#E6F6F5"/><circle cx="60" cy="46" r="22" fill="#8D5524"/><path d="M38 42c0-16 44-16 44 0-6-8-38-8-44 0z" fill="#1E293B"/><path d="M26 112c4-24 22-34 34-34s30 10 34 34" fill="#267F7A"/><circle cx="52" cy="46" r="2.5" fill="#1E293B"/><circle cx="68" cy="46" r="2.5" fill="#1E293B"/><path d="M54 55q6 5 12 0" stroke="#1E293B" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`),
+      putri: "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#F1EDE6"/><path d="M32 50c0-22 56-22 56 0v30H32V50z" fill="#1E293B"/><circle cx="60" cy="48" r="21" fill="#A5693D"/><path d="M26 112c4-24 22-34 34-34s30 10 34 34" fill="#45C6C0"/><circle cx="52" cy="48" r="2.5" fill="#1E293B"/><circle cx="68" cy="48" r="2.5" fill="#1E293B"/><path d="M54 57q6 5 12 0" stroke="#1E293B" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`)
+    };
+
+    // =========================================================
+    // 2. STATE APLIKASI & PENYIMPANAN PERSISTEN
+    // =========================================================
+    const STORAGE_KEYS = {
+      USER: 'kaih_wamena_user_v1',
+      RECORDS: 'kaih_wamena_records_v1',
+      LEADERBOARD: 'kaih_wamena_leaderboard_v1',
+      THEME: 'kaih_wamena_theme_v1',
+      NOTIF: 'kaih_wamena_notif_v1'
+    };
+
+    let appState = {
+      user: null,
+      records: {},
+      draftToday: {},
+      witOffsetMs: 0,
+      lastNotifiedDate: null
+    };
+
+    // =========================================================
+    // 3. WAKTU WIT INDEPENDEN (UTC+9) & SAPAAN OTOMATIS
+    // =========================================================
+    async function syncIndependentWITTime() {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const res = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jayapura', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          const serverUtcMs = new Date(data.utc_datetime).getTime();
+          appState.witOffsetMs = serverUtcMs - Date.now();
+        }
+      } catch (e) {
+        appState.witOffsetMs = 0;
+      }
+    }
+
+    function getNowWIT() {
+      const trueUtcMs = Date.now() + appState.witOffsetMs;
+      const witMs = trueUtcMs + (9 * 60 * 60 * 1000);
+      const d = new Date(witMs);
+      return {
+        year: d.getUTCFullYear(),
+        month: d.getUTCMonth() + 1,
+        day: d.getUTCDate(),
+        dayOfWeek: d.getUTCDay(),
+        hours: d.getUTCHours(),
+        minutes: d.getUTCMinutes(),
+        seconds: d.getUTCSeconds(),
+        dateKey: `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`,
+        monthKey: `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
+      };
+    }
+
+    function formatIndonesianDate(witObj) {
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      return `${days[witObj.dayOfWeek]}, ${witObj.day} ${months[witObj.month - 1]} ${witObj.year}`;
+    }
+
+    function getGreetingByHour(hour) {
+      if (hour >= 4 && hour < 11) return 'Selamat Pagi';
+      if (hour >= 11 && hour < 15) return 'Selamat Siang';
+      if (hour >= 15 && hour < 18) return 'Selamat Sore';
+      return 'Selamat Malam';
+    }
+
+    function startLiveClockWIT() {
+      const updateUI = () => {
+        const wit = getNowWIT();
+        const timeStr = `${String(wit.hours).padStart(2, '0')}:${String(wit.minutes).padStart(2, '0')}:${String(wit.seconds).padStart(2, '0')} WIT`;
+        const dateStr = formatIndonesianDate(wit);
+
+        const headerEl = document.getElementById('headerClockWIT');
+        const liveEl = document.getElementById('liveClockWIT');
+        const berandaDateEl = document.getElementById('berandaDateText');
+        const formDateEl = document.getElementById('formDateSubtitle');
+        const greetingEl = document.getElementById('greetingTitle');
+
+        if (headerEl) headerEl.textContent = `${dateStr} • ${timeStr}`;
+        if (liveEl) liveEl.textContent = timeStr;
+        if (berandaDateEl) berandaDateEl.textContent = dateStr;
+        if (formDateEl) formDateEl.textContent = `Tanggal Aktif: ${dateStr}`;
+
+        if (greetingEl && appState.user) {
+          const sapaan = getGreetingByHour(wit.hours);
+          greetingEl.textContent = `${sapaan}, ${appState.user.name}!`;
+        }
+
+        checkDailyReminder(wit);
+      };
+
+      updateUI();
+      setInterval(updateUI, 1000);
+    }
+
+    // =========================================================
+    // 4. INSTRUMEN LAGU INDONESIA RAYA & EFEK SUARA (TONE.JS)
+    // =========================================================
+    let anthemState = {
+      isPlaying: false,
+      isPaused: false,
+      stepIndex: 0,
+      synth: null,
+      timerId: null
+    };
+
+    const INDONESIA_RAYA_NOTES = [
+      { note: 'E4', dur: 0.35 }, { note: 'F#4', dur: 0.35 },
+      { note: 'G#4', dur: 0.7 }, { note: 'E4', dur: 0.35 }, { note: 'E4', dur: 0.35 },
+      { note: 'B4', dur: 0.7 }, { note: 'B4', dur: 0.35 }, { note: 'C#5', dur: 0.35 },
+      { note: 'B4', dur: 0.7 }, { note: 'G#4', dur: 0.35 }, { note: 'E4', dur: 0.35 },
+      { note: 'F#4', dur: 1.1 }, { note: 'F#4', dur: 0.35 }, { note: 'G#4', dur: 0.35 },
+      { note: 'A4', dur: 0.7 }, { note: 'F#4', dur: 0.35 }, { note: 'F#4', dur: 0.35 },
+      { note: 'C#5', dur: 0.7 }, { note: 'B4', dur: 0.35 }, { note: 'A4', dur: 0.35 },
+      { note: 'G#4', dur: 0.7 }, { note: 'F#4', dur: 0.35 }, { note: 'E4', dur: 0.35 },
+      { note: 'G#4', dur: 1.2 }
+    ];
+
+    function updateAnthemButtonUI() {
+      const labelEl = document.getElementById('anthemLabel');
+      const iconEl = document.getElementById('anthemIcon');
+      const statusEl = document.getElementById('anthemStatus');
+      if (!labelEl || !iconEl || !statusEl) return;
+
+      if (anthemState.isPlaying) {
+        iconEl.textContent = '⏸️';
+        labelEl.textContent = 'Jeda Instrumen';
+        statusEl.textContent = 'Sedang memutar instrumen melodi Indonesia Raya...';
+      } else if (anthemState.isPaused) {
+        iconEl.textContent = '▶️';
+        labelEl.textContent = 'Lanjutkan Instrumen';
+        statusEl.textContent = 'Instrumen dijeda. Klik Lanjutkan untuk meneruskan lagu.';
+      } else {
+        iconEl.textContent = '🎵';
+        labelEl.textContent = 'Putar Instrumen Indonesia Raya';
+        statusEl.textContent = 'Klik tombol di atas untuk memutar melodi Indonesia Raya.';
+      }
+    }
+
+    function scheduleNextAnthemNote() {
+      if (!anthemState.isPlaying) return;
+
+      if (anthemState.stepIndex >= INDONESIA_RAYA_NOTES.length) {
+        anthemState.stepIndex = 0;
+      }
+
+      const item = INDONESIA_RAYA_NOTES[anthemState.stepIndex];
+      try {
+        if (anthemState.synth) {
+          anthemState.synth.triggerAttackRelease(item.note, item.dur * 0.85);
+        }
+      } catch (e) {}
+
+      anthemState.stepIndex += 1;
+      anthemState.timerId = setTimeout(scheduleNextAnthemNote, item.dur * 1000);
+    }
+
+    async function startOrResumeAnthem() {
+      try {
+        if (typeof Tone !== 'undefined') {
+          await Tone.start();
+          if (!anthemState.synth) {
+            anthemState.synth = new Tone.PolySynth(Tone.Synth, {
+              oscillator: { type: 'triangle' },
+              envelope: { attack: 0.04, decay: 0.2, sustain: 0.4, release: 0.6 }
+            }).toDestination();
+            anthemState.synth.volume.value = -6;
+          }
+        }
+        if (anthemState.isPlaying) return;
+        anthemState.isPlaying = true;
+        anthemState.isPaused = false;
+        updateAnthemButtonUI();
+        scheduleNextAnthemNote();
+      } catch (e) {
+        updateAnthemButtonUI();
+      }
+    }
+
+    function pauseAnthem() {
+      if (!anthemState.isPlaying) return;
+      anthemState.isPlaying = false;
+      anthemState.isPaused = true;
+      if (anthemState.timerId) {
+        clearTimeout(anthemState.timerId);
+        anthemState.timerId = null;
+      }
+      updateAnthemButtonUI();
+    }
+
+    function stopAnthem() {
+      anthemState.isPlaying = false;
+      anthemState.isPaused = false;
+      anthemState.stepIndex = 0;
+      if (anthemState.timerId) {
+        clearTimeout(anthemState.timerId);
+        anthemState.timerId = null;
+      }
+      updateAnthemButtonUI();
+    }
+
+    function toggleAnthemPlayback() {
+      if (anthemState.isPlaying) {
+        pauseAnthem();
+      } else {
+        startOrResumeAnthem();
+      }
+    }
+
+    async function playCheckSound(isChecked) {
+      try {
+        if (typeof Tone === 'undefined') return;
+        await Tone.start();
+        const synth = new Tone.Synth({
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.01, decay: 0.12, sustain: 0.05, release: 0.2 }
+        }).toDestination();
+        synth.volume.value = -8;
+        if (isChecked) {
+          synth.triggerAttackRelease('C5', '16n');
+          setTimeout(() => synth.triggerAttackRelease('G5', '16n'), 85);
+        } else {
+          synth.triggerAttackRelease('E4', '16n');
+        }
+      } catch (e) {}
+    }
+
+    async function playCelebrationSound() {
+      try {
+        if (typeof Tone === 'undefined') return;
+        await Tone.start();
+        const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        synth.volume.value = -6;
+        const notes = ['C5', 'E5', 'G5', 'C6'];
+        notes.forEach((n, idx) => {
+          setTimeout(() => synth.triggerAttackRelease(n, '8n'), idx * 120);
+        });
+      } catch (e) {}
+    }
+
+    // =========================================================
+    // 5. EFEK KEMBANG API PERAYAAN (SAAT 7/7 SELESAI)
+    // =========================================================
+    function launchFireworks() {
+      const canvas = document.getElementById('fireworksCanvas');
+      if (!canvas) return;
+      canvas.classList.remove('hidden');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#45C6C0', '#267F7A', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981'];
+
+      function createBurst(x, y) {
+        for (let i = 0; i < 42; i++) {
+          const angle = (Math.PI * 2 * i) / 42;
+          const speed = 2 + Math.random() * 4.5;
+          particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            radius: 2.5 + Math.random() * 2.5
+          });
+        }
+      }
+
+      createBurst(canvas.width * 0.3, canvas.height * 0.35);
+      setTimeout(() => createBurst(canvas.width * 0.7, canvas.height * 0.3), 300);
+      setTimeout(() => createBurst(canvas.width * 0.5, canvas.height * 0.45), 600);
+
+      let frame = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.06;
+          p.alpha -= 0.016;
+          if (p.alpha <= 0) {
+            particles.splice(i, 1);
+          } else {
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.globalAlpha = 1;
+        frame++;
+        if (particles.length > 0 || frame < 80) {
+          requestAnimationFrame(animate);
+        } else {
+          canvas.classList.add('hidden');
+        }
+      }
+      animate();
+    }
+
+    // =========================================================
+    // 6. PERHITUNGAN POIN & STREAK (KALENDER LOKAL KONSISTEN)
+    // =========================================================
+    function calculateHabitPoints(habitCfg, entry) {
+      if (!entry || !entry.done) return 0;
+      if (!habitCfg.allowNoteAndPhoto) return 1;
+      const hasNote = entry.note && entry.note.trim().length > 0;
+      const hasPhoto = entry.photo && entry.photo.length > 0;
+      if (hasNote && hasPhoto) return 3;
+      if (hasNote || hasPhoto) return 2;
+      return 1;
+    }
+
+    function calculateRecordTotalPoints(habitsMap) {
+      if (!habitsMap) return 0;
+      return HABITS_CONFIG.reduce((sum, cfg) => sum + calculateHabitPoints(cfg, habitsMap[cfg.id]), 0);
+    }
+
+    function isDayComplete(record) {
+      if (!record || !record.habits) return false;
+      return HABITS_CONFIG.every(cfg => record.habits[cfg.id]?.done === true);
+    }
+
+    function addDaysToDateKey(dateKey, deltaDays) {
+      const [y, m, d] = dateKey.split('-').map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d + deltaDays));
+      return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}-${String(dt.getUTCDate()).padStart(2, '0')}`;
+    }
+
+    function computeStreaks() {
+      const wit = getNowWIT();
+      const todayKey = wit.dateKey;
+      const completeDates = Object.keys(appState.records)
+        .filter(k => isDayComplete(appState.records[k]))
+        .sort();
+
+      if (completeDates.length === 0) {
+        return { currentStreak: 0, bestStreak: 0, totalComplete: 0 };
+      }
+
+      // Hitung rekor streak terpanjang sepanjang waktu
+      let best = 1;
+      let run = 1;
+      for (let i = 1; i < completeDates.length; i++) {
+        if (addDaysToDateKey(completeDates[i - 1], 1) === completeDates[i]) {
+          run++;
+          if (run > best) best = run;
+        } else {
+          run = 1;
+        }
+      }
+
+      // Hitung streak aktif saat ini (berakhir hari ini atau kemarin jika hari ini belum 7/7)
+      let current = 0;
+      let cursor = isDayComplete(appState.records[todayKey]) ? todayKey : addDaysToDateKey(todayKey, -1);
+      while (isDayComplete(appState.records[cursor])) {
+        current++;
+        cursor = addDaysToDateKey(cursor, -1);
+      }
+
+      return {
+        currentStreak: current,
+        bestStreak: Math.max(best, current),
+        totalComplete: completeDates.length
+      };
+    }
+
+    function getFlameAppearance(streak) {
+      if (streak <= 0) {
+        return { outer: '#B8B4AC', inner: '#D6CEC1', label: 'Mulai membangun kebiasaan', active: false };
+      }
+      if (streak <= 2) {
+        return { outer: '#8CE0DC', inner: '#CCF3F1', label: 'Langkah awal yang baik!', active: true };
+      }
+      if (streak <= 6) {
+        return { outer: '#45C6C0', inner: '#A7ECE9', label: 'Konsisten!', active: true };
+      }
+      if (streak <= 13) {
+        return { outer: '#F59E0B', inner: '#FDE68A', label: 'Semangat membara!', active: true };
+      }
+      if (streak <= 29) {
+        return { outer: '#F97316', inner: '#FED7AA', label: 'Kebiasaan hebat terbentuk!', active: true };
+      }
+      if (streak <= 59) {
+        return { outer: '#EF4444', inner: '#FECACA', label: 'Teladan GEMINI CENDRAWASIH!', active: true };
+      }
+      return { outer: '#7C3AED', inner: '#FBBF24', label: 'Luar biasa! Legenda 7 KAIH!', active: true };
+    }
+
+    function getMonthlyPoints(monthKey) {
+      let total = 0;
+      Object.entries(appState.records).forEach(([dateKey, rec]) => {
+        if (dateKey.startsWith(monthKey)) {
+          total += calculateRecordTotalPoints(rec.habits);
+        }
+      });
+      return total;
+    }
+
+    // =========================================================
+    // 7. SINKRONISASI DATA LOKAL & GOOGLE SPREADSHEETS
+    // =========================================================
+    function loadAllStorage() {
+      try {
+        const u = localStorage.getItem(STORAGE_KEYS.USER);
+        if (u) appState.user = JSON.parse(u);
+        const r = localStorage.getItem(STORAGE_KEYS.RECORDS);
+        if (r) appState.records = JSON.parse(r);
+      } catch (e) {}
+    }
+
+    function saveRecordsStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(appState.records));
+      } catch (e) {}
+    }
+
+    function saveUserStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(appState.user));
+      } catch (e) {}
+    }
+
+    function initTodayDraft() {
+      const todayKey = getNowWIT().dateKey;
+      const savedToday = appState.records[todayKey];
+      appState.draftToday = {};
+      HABITS_CONFIG.forEach(cfg => {
+        const existing = savedToday?.habits?.[cfg.id];
+        appState.draftToday[cfg.id] = {
+          done: existing?.done === true,
+          note: existing?.note || '',
+          photo: existing?.photo || ''
+        };
+      });
+    }
+
+    // =========================================================
+    // 8. RENDERING UI (BERANDA, FORMULIR, PERKEMBANGAN, PROFIL)
+    // =========================================================
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const el = document.createElement('div');
+      const bg = type === 'error' ? 'bg-red-600 text-white' : 'bg-[#267F7A] text-white';
+      el.className = `${bg} px-4 py-3 rounded-2xl shadow-lg text-xs sm:text-sm font-bold flex items-center justify-between gap-3 pointer-events-auto animate-fade-up`;
+      el.innerHTML = `<span>${message}</span><button type="button" class="opacity-80 hover:opacity-100">✕</button>`;
+      el.querySelector('button').onclick = () => el.remove();
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById(`tab-${tabName}`);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.nav === tabName) {
+          btn.classList.add('bg-white', 'text-[#267F7A]', 'shadow-xs');
+          btn.classList.remove('text-[#303B38]/70');
+        } else {
+          btn.classList.remove('bg-white', 'text-[#267F7A]', 'shadow-xs');
+          btn.classList.add('text-[#303B38]/70');
+        }
+      });
+
+      document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+        if (btn.dataset.nav === tabName) {
+          btn.classList.add('bg-[#45C6C0]/15', 'text-[#267F7A]');
+          btn.classList.remove('text-[#303B38]/65');
+        } else {
+          btn.classList.remove('bg-[#45C6C0]/15', 'text-[#267F7A]');
+          btn.classList.add('text-[#303B38]/65');
+        }
+      });
+
+      if (tabName === 'beranda') renderBeranda();
+      if (tabName === 'kebiasaan') renderHabitsForm();
+      if (tabName === 'perkembangan') renderPerkembangan();
+      if (tabName === 'analisis') renderAnalisisDashboard();
+      if (tabName === 'profil') renderProfilAndLeaderboard();
+    }
+
+    function renderBeranda() {
+      const wit = getNowWIT();
+      const todayKey = wit.dateKey;
+      const savedToday = appState.records[todayKey];
+      const { currentStreak, bestStreak } = computeStreaks();
+      const flame = getFlameAppearance(currentStreak);
+
+      document.getElementById('berandaClassBadge').textContent = `Kelas ${appState.user.className}`;
+      document.getElementById('berandaStreakCount').textContent = currentStreak;
+      document.getElementById('berandaStreakLabel').textContent = flame.label;
+      document.getElementById('berandaBestStreak').textContent = `${bestStreak} hari`;
+
+      const flameOuter = document.getElementById('flameOuter');
+      const flameInner = document.getElementById('flameInner');
+      const flameSvg = document.getElementById('streakFlameSvg');
+      flameOuter.setAttribute('fill', flame.outer);
+      flameInner.setAttribute('fill', flame.inner);
+      if (flame.active) flameSvg.classList.add('flame-active');
+      else flameSvg.classList.remove('flame-active');
+
+      let doneCount = 0;
+      HABITS_CONFIG.forEach(cfg => {
+        if (savedToday?.habits?.[cfg.id]?.done) doneCount++;
+      });
+
+      const pct = Math.round((doneCount / 7) * 100);
+      const todayPoints = calculateRecordTotalPoints(savedToday?.habits);
+      const monthPoints = getMonthlyPoints(wit.monthKey);
+
+      document.getElementById('berandaDoneCount').textContent = doneCount;
+      document.getElementById('berandaPercentText').textContent = `${pct}%`;
+      document.getElementById('berandaProgressBar').style.width = `${pct}%`;
+      document.getElementById('berandaPointsTodayBadge').textContent = `+${todayPoints} Poin Hari Ini`;
+      document.getElementById('berandaMonthlyPoints').textContent = `${monthPoints} Poin`;
+
+      const grid = document.getElementById('berandaSummaryGrid');
+      grid.innerHTML = HABITS_CONFIG.map(cfg => {
+        const item = savedToday?.habits?.[cfg.id];
+        const isDone = item?.done === true;
+        const pts = calculateHabitPoints(cfg, item);
+        return `
+          <div class="p-3.5 rounded-xl border ${isDone ? 'bg-[#45C6C0]/10 border-[#45C6C0]/40' : 'bg-[#F7F6F2] border-[#D6CEC1]'} flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="text-xl shrink-0">${cfg.icon}</span>
+              <div class="truncate">
+                <p class="text-xs font-bold text-[#303B38] truncate">${cfg.name}</p>
+                <p class="text-[11px] ${isDone ? 'text-[#267F7A] font-semibold' : 'text-[#303B38]/60'}">
+                  ${isDone ? `Sudah dilakukan (+${pts} poin)` : 'Belum dicatat'}
+                </p>
+              </div>
+            </div>
+            <span class="text-sm shrink-0">${isDone ? '✅' : '⏳'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateDraftLiveCounters() {
+      let done = 0;
+      let pts = 0;
+      HABITS_CONFIG.forEach(cfg => {
+        const entry = appState.draftToday[cfg.id];
+        if (entry?.done) {
+          done++;
+          pts += calculateHabitPoints(cfg, entry);
+        }
+      });
+      document.getElementById('formLiveStatusText').textContent = `${done} dari 7 selesai`;
+      document.getElementById('formLivePointsText').textContent = `${pts} Poin`;
+    }
+
+    function renderHabitsForm() {
+      const list = document.getElementById('habitsFormList');
+      list.innerHTML = HABITS_CONFIG.map((cfg, idx) => {
+        const entry = appState.draftToday[cfg.id] || { done: false, note: '', photo: '' };
+        const pts = calculateHabitPoints(cfg, entry);
+        return `
+          <div class="py-5 space-y-3">
+            <div class="flex items-start sm:items-center justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-[#F1EDE6] border border-[#D6CEC1] flex items-center justify-center text-2xl shrink-0">
+                  ${cfg.icon}
+                </div>
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h4 class="text-base font-extrabold text-[#303B38]">${idx + 1}. ${cfg.name}</h4>
+                    <span class="px-2.5 py-0.5 rounded-full bg-[#45C6C0]/15 text-[#267F7A] text-[11px] font-bold">
+                      ⏰ ${cfg.timeRule}
+                    </span>
+                  </div>
+                  <p class="text-xs text-[#303B38]/75 mt-0.5">${cfg.desc}</p>
+                  <p class="text-[11px] font-semibold mt-1 ${entry.done ? 'text-[#267F7A]' : 'text-[#303B38]/55'}">
+                    Status: ${entry.done ? `Sudah dilakukan (+${pts} poin)` : 'Belum dicatat'}
+                  </p>
+                </div>
+              </div>
+
+              <button type="button" onclick="toggleHabitDone('${cfg.id}')"
+                class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm border transition shrink-0 ${entry.done ? 'bg-[#45C6C0] text-white border-[#45C6C0] shadow-xs' : 'bg-[#F7F6F2] text-[#303B38] border-[#D6CEC1] hover:border-[#45C6C0]'}">
+                ${entry.done ? '✓ Sudah Dilakukan' : 'Tandai Selesai'}
+              </button>
+            </div>
+
+            ${cfg.allowNoteAndPhoto ? `
+              <div class="pl-0 sm:pl-14 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <input type="text" value="${escapeHtml(entry.note)}" oninput="updateHabitNote('${cfg.id}', this.value)"
+                    placeholder="Keterangan kegiatan (opsional, +1 poin)..."
+                    class="w-full px-3.5 py-2 rounded-xl bg-[#F7F6F2] border border-[#D6CEC1] text-xs font-medium text-[#303B38] focus:outline-none focus:border-[#45C6C0]" />
+                </div>
+                <div class="flex items-center gap-2">
+                  <label class="flex-1 py-2 px-3 rounded-xl bg-[#F1EDE6] hover:bg-[#D6CEC1]/50 border border-[#D6CEC1] text-xs font-bold text-[#303B38] text-center cursor-pointer transition truncate">
+                    <span>${entry.photo ? '📷 Ganti Foto Bukti' : '📷 Tambah Foto (Opsional)'}</span>
+                    <input type="file" accept="image/*" onchange="handleHabitPhotoUpload('${cfg.id}', this)" class="hidden" />
+                  </label>
+                  ${entry.photo ? `
+                    <img src="${entry.photo}" alt="Bukti" class="w-9 h-9 rounded-lg object-cover border border-[#45C6C0] shrink-0" />
+                    <button type="button" onclick="removeHabitPhoto('${cfg.id}')" class="text-xs text-red-600 font-bold px-1.5">✕</button>
+                  ` : ''}
+                </div>
+              </div>
+            ` : `
+              <p class="pl-0 sm:pl-14 text-[11px] italic text-[#303B38]/55">
+                *Kebiasaan ini cukup dicentang tanpa keterangan atau foto.
+              </p>
+            `}
+          </div>
+        `;
+      }).join('');
+
+      updateDraftLiveCounters();
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function toggleHabitDone(habitId) {
+      const nextState = !appState.draftToday[habitId].done;
+      appState.draftToday[habitId].done = nextState;
+      playCheckSound(nextState);
+      renderHabitsForm();
+    }
+
+    function updateHabitNote(habitId, value) {
+      appState.draftToday[habitId].note = value;
+      updateDraftLiveCounters();
+    }
+
+    function compressImageFile(file, maxWidth = 480) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const scale = Math.min(1, maxWidth / img.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.72));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleHabitPhotoUpload(habitId, inputEl) {
+      const file = inputEl.files?.[0];
+      if (!file) return;
+      const compressed = await compressImageFile(file, 420);
+      appState.draftToday[habitId].photo = compressed;
+      renderHabitsForm();
+    }
+
+    function removeHabitPhoto(habitId) {
+      appState.draftToday[habitId].photo = '';
+      renderHabitsForm();
+    }
+
+    async function saveTodayHabits() {
+      const wit = getNowWIT();
+      const todayKey = wit.dateKey;
+      const wasAlreadyComplete = isDayComplete(appState.records[todayKey]);
+
+      appState.records[todayKey] = {
+        date: todayKey,
+        updatedAtWIT: `${String(wit.hours).padStart(2, '0')}:${String(wit.minutes).padStart(2, '0')} WIT`,
+        habits: JSON.parse(JSON.stringify(appState.draftToday))
+      };
+
+      saveRecordsStorage();
+      const nowComplete = isDayComplete(appState.records[todayKey]);
+      const monthPoints = getMonthlyPoints(wit.monthKey);
+
+      renderBeranda();
+
+      if (nowComplete && !wasAlreadyComplete) {
+        playCelebrationSound();
+        launchFireworks();
+        showToast('Luar biasa! 7 dari 7 kebiasaan hari ini selesai! 🎉');
+      } else {
+        showToast('Kebiasaan hari ini berhasil disimpan!');
+      }
+
+      // Kirim Nama, Kelas, dan Total Poin ke Google Spreadsheets
+      try {
+        await kirimPoinKeSpreadsheet(appState.user.name, appState.user.className, monthPoints);
+      } catch (err) {
+        console.error('Gagal mengirim poin ke Google Sheets:', err);
+      }
+    }
+
+    // =========================================================
+    // 9. HALAMAN PERKEMBANGANKU (GRAFIK, KALENDER & RIWAYAT)
+    // =========================================================
+    function renderPerkembangan() {
+      const { currentStreak, bestStreak, totalComplete } = computeStreaks();
+      document.getElementById('progCurrentStreak').textContent = currentStreak;
+      document.getElementById('progBestStreak').textContent = bestStreak;
+      document.getElementById('progTotalCompleteDays').textContent = totalComplete;
+
+      drawProgressChart();
+      renderSimpleCalendar();
+      renderHabitPercentages();
+      renderHistoryList();
+    }
+
+    function drawProgressChart() {
+      const canvas = document.getElementById('progressChartCanvas');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = (rect.width || 600) * dpr;
+      canvas.height = 220 * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const width = rect.width || 600;
+      const height = 220;
+      ctx.clearRect(0, 0, width, height);
+
+      const wit = getNowWIT();
+      const labels = [];
+      const values = [];
+
+      for (let i = 6; i >= 0; i--) {
+        const dKey = addDaysToDateKey(wit.dateKey, -i);
+        const [, m, d] = dKey.split('-');
+        labels.push(`${d}/${m}`);
+        const rec = appState.records[dKey];
+        let count = 0;
+        if (rec?.habits) {
+          HABITS_CONFIG.forEach(cfg => { if (rec.habits[cfg.id]?.done) count++; });
+        }
+        values.push(count);
+      }
+
+      const padLeft = 36, padRight = 20, padTop = 24, padBottom = 34;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      // Garis grid horizontal (0..7)
+      ctx.strokeStyle = '#E5E0D8';
+      ctx.lineWidth = 1;
+      ctx.font = '600 11px Inter, sans-serif';
+      ctx.fillStyle = '#6B7280';
+
+      for (let v = 0; v <= 7; v += 7) {
+        const y = padTop + chartH - (v / 7) * chartH;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(width - padRight, y);
+        ctx.stroke();
+        ctx.fillText(String(v), 12, y + 4);
+      }
+
+      const barSlot = chartW / 7;
+      const barW = Math.min(34, barSlot * 0.55);
+
+      values.forEach((val, idx) => {
+        const x = padLeft + idx * barSlot + (barSlot - barW) / 2;
+        const barH = (val / 7) * chartH;
+        const y = padTop + chartH - barH;
+
+        ctx.fillStyle = val === 7 ? '#267F7A' : (val > 0 ? '#45C6C0' : '#E5E0D8');
+        ctx.beginPath();
+        ctx.roundRect(x, Math.max(padTop, y), barW, Math.max(4, barH), 6);
+        ctx.fill();
+
+        ctx.fillStyle = '#303B38';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${val}/7`, x + barW / 2, y - 6);
+        ctx.fillStyle = '#6B7280';
+        ctx.fillText(labels[idx], x + barW / 2, height - 10);
+      });
+    }
+
+    function renderSimpleCalendar() {
+      const wit = getNowWIT();
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      document.getElementById('calendarMonthLabel').textContent = `${months[wit.month - 1]} ${wit.year}`;
+
+      const firstDay = new Date(Date.UTC(wit.year, wit.month - 1, 1)).getUTCDay();
+      const daysInMonth = new Date(Date.UTC(wit.year, wit.month, 0)).getUTCDate();
+      const grid = document.getElementById('simpleCalendarGrid');
+
+      let html = '';
+      for (let i = 0; i < firstDay; i++) {
+        html += `<div class="h-9"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dKey = `${wit.year}-${String(wit.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const rec = appState.records[dKey];
+        const complete = isDayComplete(rec);
+        const hasAny = rec && Object.values(rec.habits || {}).some(h => h.done);
+        const isToday = dKey === wit.dateKey;
+
+        let cls = 'bg-[#F7F6F2] text-[#303B38]/70 border-[#D6CEC1]/60';
+        if (complete) cls = 'bg-[#45C6C0] text-white font-extrabold border-[#267F7A]';
+        else if (hasAny) cls = 'bg-[#D6CEC1] text-[#303B38] font-bold border-[#B8B4AC]';
+
+        html += `
+          <div class="h-9 rounded-xl border ${cls} ${isToday ? 'ring-2 ring-[#267F7A]' : ''} flex items-center justify-center text-xs">
+            ${day}
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+    }
+
+    function renderHabitPercentages() {
+      const period = document.getElementById('periodFilterSelect').value;
+      const wit = getNowWIT();
+      const allKeys = Object.keys(appState.records).sort();
+      let filteredKeys = allKeys;
+
+      if (period !== 'all') {
+        const daysCount = Number(period);
+        const minKey = addDaysToDateKey(wit.dateKey, -(daysCount - 1));
+        filteredKeys = allKeys.filter(k => k >= minKey && k <= wit.dateKey);
+      }
+
+      const denom = Math.max(1, filteredKeys.length);
+      const container = document.getElementById('habitPercentageList');
+
+      container.innerHTML = HABITS_CONFIG.map(cfg => {
+        let doneDays = 0;
+        filteredKeys.forEach(k => {
+          if (appState.records[k]?.habits?.[cfg.id]?.done) doneDays++;
+        });
+        const pct = filteredKeys.length === 0 ? 0 : Math.round((doneDays / denom) * 100);
+        return `
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span class="text-[#303B38]">${cfg.icon} ${cfg.name}</span>
+              <span class="text-[#267F7A]">${pct}% (${doneDays}/${filteredKeys.length} hari)</span>
+            </div>
+            <div class="w-full h-2 bg-[#F1EDE6] rounded-full overflow-hidden">
+              <div class="h-full bg-[#45C6C0] rounded-full" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHistoryList() {
+      const container = document.getElementById('historyListContainer');
+      const keys = Object.keys(appState.records).sort().reverse();
+      if (keys.length === 0) {
+        container.innerHTML = `<p class="text-xs text-[#303B38]/60 italic">Belum ada catatan harian yang tersimpan.</p>`;
+        return;
+      }
+
+      container.innerHTML = keys.slice(0, 14).map(k => {
+        const rec = appState.records[k];
+        const doneCount = HABITS_CONFIG.filter(c => rec.habits?.[c.id]?.done).length;
+        const pts = calculateRecordTotalPoints(rec.habits);
+        return `
+          <div class="p-3.5 rounded-xl bg-[#F7F6F2] border border-[#D6CEC1] flex items-center justify-between gap-3">
+            <div>
+              <p class="text-xs sm:text-sm font-extrabold text-[#303B38]">${k}</p>
+              <p class="text-[11px] text-[#303B38]/70">Disimpan pukul ${rec.updatedAtWIT || '-'}</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold ${doneCount === 7 ? 'bg-[#45C6C0] text-white' : 'bg-[#D6CEC1]/60 text-[#303B38]'}">
+                ${doneCount}/7 Selesai
+              </span>
+              <p class="text-[11px] font-bold text-[#267F7A] mt-1">+${pts} Poin</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================
+    // 10. PROFIL & PAPAN PERINGKAT DARI GOOGLE SPREADSHEETS
+    // =========================================================
+    function renderProfilAndLeaderboard() {
+      if (!appState.user) return;
+      document.getElementById('profileDisplayName').textContent = appState.user.name;
+      document.getElementById('profileDisplayClass').textContent = `Kelas ${appState.user.className}`;
+      document.getElementById('editNameInput').value = appState.user.name;
+      document.getElementById('editClassInput').value = appState.user.className;
+
+      const avatarSrc = appState.user.avatar || AVATAR_PRESETS.putra;
+      document.getElementById('profileMainAvatar').src = avatarSrc;
+      document.getElementById('headerAvatar').src = avatarSrc;
+      document.getElementById('presetPutraImg').src = AVATAR_PRESETS.putra;
+      document.getElementById('presetPutriImg').src = AVATAR_PRESETS.putri;
+
+      renderLeaderboard();
+    }
+
+    async function renderLeaderboard() {
+      const wit = getNowWIT();
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      document.getElementById('leaderboardMonthBadge').textContent = `${months[wit.month - 1]} ${wit.year}`;
+
+      const myPoints = getMonthlyPoints(wit.monthKey);
+      document.getElementById('leaderboardMyPoints').textContent = `${myPoints} Poin`;
+
+      const listEl = document.getElementById('leaderboardList');
+      listEl.innerHTML = `<div class="py-8 text-center text-xs font-semibold text-[#267F7A]">Memuat peringkat langsung dari Google Sheets...</div>`;
+
+      let rows = [];
+      try {
+        const fetched = await muatPeringkatSpreadsheet();
+        if (Array.isArray(fetched)) {
+          rows = fetched.map(item => ({
+            nama: item.nama || 'Siswa',
+            kelas: item.kelas || '-',
+            total_poin: Number(item.total_poin) || 0
+          }));
+        }
+      } catch (e) {
+        console.error('Gagal mengambil peringkat dari Spreadsheet:', e);
+      }
+
+      // Pastikan akun aktif selalu tampil dengan poin terbarunya meskipun jaringan lambat
+      const meIndex = rows.findIndex(
+        r => r.nama.toLowerCase().trim() === appState.user.name.toLowerCase().trim() &&
+             r.kelas.toLowerCase().trim() === appState.user.className.toLowerCase().trim()
+      );
+      if (meIndex > -1) {
+        rows[meIndex].total_poin = Math.max(rows[meIndex].total_poin, myPoints);
+      } else {
+        rows.push({ nama: appState.user.name, kelas: appState.user.className, total_poin: myPoints });
+      }
+
+      rows.sort((a, b) => b.total_poin - a.total_poin);
+
+      if (rows.length === 0) {
+        listEl.innerHTML = `<p class="py-6 text-center text-xs text-[#303B38]/60">Belum ada data peringkat bulan ini.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = rows.map((item, idx) => {
+        const isMe = item.nama.toLowerCase().trim() === appState.user.name.toLowerCase().trim() &&
+                     item.kelas.toLowerCase().trim() === appState.user.className.toLowerCase().trim();
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+        return `
+          <div class="py-3 px-3 rounded-xl ${isMe ? 'bg-[#45C6C0]/15 border border-[#45C6C0]/40' : ''} flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-8 text-center font-extrabold text-sm ${idx < 3 ? 'text-lg' : 'text-[#303B38]/65'}">${medal}</span>
+              <div class="truncate">
+                <p class="text-sm font-extrabold text-[#303B38] truncate">
+                  ${escapeHtml(item.nama)} ${isMe ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-[#267F7A] text-white ml-1">Kamu</span>' : ''}
+                </p>
+                <p class="text-xs text-[#303B38]/70">Kelas ${escapeHtml(item.kelas)}</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-sm font-extrabold text-[#267F7A]">${item.total_poin}</span>
+              <span class="text-[11px] font-semibold text-[#303B38]/65 block">Poin</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectPresetAvatar(gender) {
+      appState.user.avatar = AVATAR_PRESETS[gender];
+      saveUserStorage();
+      renderProfilAndLeaderboard();
+      showToast('Foto profil berhasil diperbarui!');
+    }
+
+    // =========================================================
+    // 10B. DASHBOARD ANALISIS KEBIASAAN & KLASEMEN
+    // =========================================================
+    async function renderAnalisisDashboard() {
+      const wit = getNowWIT();
+      const allKeys = Object.keys(appState.records).sort();
+      const monthKeys = allKeys.filter(k => k.startsWith(wit.monthKey));
+
+      let totalDoneAll = 0;
+      const habitDoneCounts = {};
+      const habitMonthPoints = {};
+      HABITS_CONFIG.forEach(cfg => {
+        habitDoneCounts[cfg.id] = 0;
+        habitMonthPoints[cfg.id] = 0;
+      });
+
+      let tier1Count = 0; // Centang saja (1 poin)
+      let tier2Count = 0; // Centang + Keterangan/Foto (2 poin)
+      let tier3Count = 0; // Lengkap Centang + Keterangan + Foto (3 poin)
+
+      allKeys.forEach(dateKey => {
+        const rec = appState.records[dateKey];
+        if (!rec?.habits) return;
+        HABITS_CONFIG.forEach(cfg => {
+          const entry = rec.habits[cfg.id];
+          if (entry?.done) {
+            totalDoneAll++;
+            habitDoneCounts[cfg.id]++;
+            const pts = calculateHabitPoints(cfg, entry);
+            if (pts === 3) tier3Count++;
+            else if (pts === 2) tier2Count++;
+            else tier1Count++;
+          }
+        });
+      });
+
+      monthKeys.forEach(dateKey => {
+        const rec = appState.records[dateKey];
+        if (!rec?.habits) return;
+        HABITS_CONFIG.forEach(cfg => {
+          habitMonthPoints[cfg.id] += calculateHabitPoints(cfg, rec.habits[cfg.id]);
+        });
+      });
+
+      const recordedDays = allKeys.length;
+      const maxPossible = recordedDays * 7;
+      const consistencyPct = maxPossible > 0 ? Math.round((totalDoneAll / maxPossible) * 100) : 0;
+      const avgPerDay = recordedDays > 0 ? (totalDoneAll / recordedDays).toFixed(1) : '0';
+
+      document.getElementById('anaConsistencyScore').textContent = `${consistencyPct}%`;
+      document.getElementById('anaConsistencyLabel').textContent =
+        consistencyPct >= 85 ? 'Sangat Disiplin' :
+        consistencyPct >= 60 ? 'Cukup Konsisten' :
+        recordedDays > 0 ? 'Perlu Ditingkatkan' : 'Belum ada catatan';
+      document.getElementById('anaAvgHabits').textContent = `${avgPerDay} / 7`;
+
+      // Cari kebiasaan terkuat & terlemah
+      let strongest = HABITS_CONFIG[0];
+      let weakest = HABITS_CONFIG[0];
+      HABITS_CONFIG.forEach(cfg => {
+        if (habitDoneCounts[cfg.id] > habitDoneCounts[strongest.id]) strongest = cfg;
+        if (habitDoneCounts[cfg.id] < habitDoneCounts[weakest.id]) weakest = cfg;
+      });
+
+      const strongPct = recordedDays > 0 ? Math.round((habitDoneCounts[strongest.id] / recordedDays) * 100) : 0;
+      const weakPct = recordedDays > 0 ? Math.round((habitDoneCounts[weakest.id] / recordedDays) * 100) : 0;
+
+      document.getElementById('anaStrongestHabit').textContent = recordedDays > 0 ? `${strongest.icon} ${strongest.name}` : '-';
+      document.getElementById('anaStrongestPct').textContent = `${strongPct}% tingkat penyelesaian`;
+      document.getElementById('anaWeakestHabit').textContent = recordedDays > 0 ? `${weakest.icon} ${weakest.name}` : '-';
+      document.getElementById('anaWeakestPct').textContent = `${weakPct}% tingkat penyelesaian`;
+
+      const monthPoints = getMonthlyPoints(wit.monthKey);
+      document.getElementById('anaTotalMonthPtsBadge').textContent = `${monthPoints} Poin Bulan Ini`;
+
+      // Render Kualitas Bukti (1, 2, 3 Poin)
+      const totalTier = Math.max(1, tier1Count + tier2Count + tier3Count);
+      const tiers = [
+        { label: 'Lengkap + Keterangan + Foto (3 Poin)', count: tier3Count, color: 'bg-[#267F7A]' },
+        { label: 'Centang + Keterangan/Foto (2 Poin)', count: tier2Count, color: 'bg-[#45C6C0]' },
+        { label: 'Centang Saja (1 Poin)', count: tier1Count, color: 'bg-[#D6CEC1]' }
+      ];
+
+      document.getElementById('anaQualityBreakdown').innerHTML = tiers.map(t => {
+        const pct = (tier1Count + tier2Count + tier3Count) > 0 ? Math.round((t.count / totalTier) * 100) : 0;
+        return `
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span class="text-[#303B38]">${t.label}</span>
+              <span class="text-[#267F7A]">${t.count}x (${pct}%)</span>
+            </div>
+            <div class="w-full h-2 bg-[#F1EDE6] rounded-full overflow-hidden">
+              <div class="h-full ${t.color} rounded-full" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Gambar Grafik Poin per Kebiasaan
+      drawAnalysisHabitChart(habitMonthPoints);
+
+      // Rekomendasi Otomatis
+      const recs = [];
+      if (recordedDays === 0) {
+        recs.push({
+          title: 'Mulai Catatan Pertama Hari Ini',
+          desc: 'Isi formulir 7 KAIH hari ini untuk mulai membangun grafik analisis dan mengumpulkan poin bulanan.'
+        });
+      } else {
+        if (weakPct < 80) {
+          recs.push({
+            title: `Fokus Tingkatkan "${weakest.name}"`,
+            desc: `Kebiasaan ini baru tercapai ${weakPct}%. Perhatikan jadwal anjurannya (${weakest.timeRule}).`
+          });
+        }
+        if (tier3Count < tier1Count) {
+          recs.push({
+            title: 'Maksimalkan Poin dengan Keterangan & Foto',
+            desc: 'Menambahkan keterangan dan foto pada 5 kebiasaan utama memberi 3 poin penuh per kebiasaan.'
+          });
+        }
+        recs.push({
+          title: `Pertahankan Keunggulan "${strongest.name}"`,
+          desc: `Kamu sudah sangat konsisten pada kebiasaan ini (${strongPct}%). Jadikan motivasi untuk kebiasaan lainnya!`
+        });
+      }
+
+      document.getElementById('anaRecommendationsList').innerHTML = recs.slice(0, 2).map(r => `
+        <div class="p-4 rounded-2xl bg-[#F7F6F2] border border-[#D6CEC1] space-y-1">
+          <p class="text-xs sm:text-sm font-extrabold text-[#267F7A]">💡 ${r.title}</p>
+          <p class="text-xs text-[#303B38]/80 leading-relaxed">${r.desc}</p>
+        </div>
+      `).join('');
+
+      // Analisis Posisi Klasemen dari Google Sheets
+      const rankEl = document.getElementById('anaRankSummary');
+      try {
+        const fetched = await muatPeringkatSpreadsheet();
+        let rows = Array.isArray(fetched) ? fetched.map(item => ({
+          nama: item.nama || 'Siswa',
+          kelas: item.kelas || '-',
+          total_poin: Number(item.total_poin) || 0
+        })) : [];
+
+        const meIdx = rows.findIndex(
+          r => r.nama.toLowerCase().trim() === appState.user.name.toLowerCase().trim() &&
+               r.kelas.toLowerCase().trim() === appState.user.className.toLowerCase().trim()
+        );
+        if (meIdx > -1) {
+          rows[meIdx].total_poin = Math.max(rows[meIdx].total_poin, monthPoints);
+        } else {
+          rows.push({ nama: appState.user.name, kelas: appState.user.className, total_poin: monthPoints });
+        }
+        rows.sort((a, b) => b.total_poin - a.total_poin);
+
+        const myRank = rows.findIndex(
+          r => r.nama.toLowerCase().trim() === appState.user.name.toLowerCase().trim() &&
+               r.kelas.toLowerCase().trim() === appState.user.className.toLowerCase().trim()
+        ) + 1;
+
+        if (myRank === 1) {
+          rankEl.textContent = `Luar biasa! Kamu berada di Peringkat #1 dari ${rows.length} siswa dengan ${monthPoints} poin bulan ini.`;
+        } else {
+          const leader = rows[0];
+          const gap = Math.max(0, leader.total_poin - monthPoints);
+          rankEl.textContent = `Kamu berada di Peringkat #${myRank} dari ${rows.length} siswa (${monthPoints} poin). Selisih ${gap} poin dari peringkat #1 (${escapeHtml(leader.nama)}).`;
+        }
+      } catch (e) {
+        rankEl.textContent = `Total poinmu bulan ini adalah ${monthPoints} poin. Terus kumpulkan poin untuk naik peringkat!`;
+      }
+    }
+
+    function drawAnalysisHabitChart(habitMonthPoints) {
+      const canvas = document.getElementById('analysisHabitChart');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width || 560;
+      const height = 240;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const shortLabels = ['Bangun', 'Ibadah', 'Olahraga', 'Makan', 'Belajar', 'Masyarakat', 'Tidur'];
+      const values = HABITS_CONFIG.map(cfg => habitMonthPoints[cfg.id] || 0);
+      const maxVal = Math.max(10, ...values);
+
+      const padLeft = 36, padRight = 16, padTop = 26, padBottom = 36;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      ctx.strokeStyle = '#E5E0D8';
+      ctx.lineWidth = 1;
+      ctx.font = '600 11px Inter, sans-serif';
+      ctx.fillStyle = '#6B7280';
+
+      [0, Math.round(maxVal / 2), maxVal].forEach(v => {
+        const y = padTop + chartH - (v / maxVal) * chartH;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(width - padRight, y);
+        ctx.stroke();
+        ctx.fillText(String(v), 10, y + 4);
+      });
+
+      const slotW = chartW / HABITS_CONFIG.length;
+      const barW = Math.min(36, slotW * 0.55);
+
+      values.forEach((val, idx) => {
+        const x = padLeft + idx * slotW + (slotW - barW) / 2;
+        const barH = (val / maxVal) * chartH;
+        const y = padTop + chartH - barH;
+
+        ctx.fillStyle = val > 0 ? '#45C6C0' : '#E5E0D8';
+        ctx.beginPath();
+        ctx.roundRect(x, Math.max(padTop, y), barW, Math.max(4, barH), 6);
+        ctx.fill();
+
+        ctx.fillStyle = '#303B38';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${val}p`, x + barW / 2, y - 6);
+        ctx.fillStyle = '#6B7280';
+        ctx.fillText(shortLabels[idx], x + barW / 2, height - 10);
+      });
+    }
+
+    // =========================================================
+    // 11. TEMA KUSTOM & PENGINGAT NOTIFIKASI
+    // =========================================================
+    function openModal(id) {
+      document.getElementById(id)?.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id)?.classList.add('hidden');
+    }
+
+    function applyThemeFromStorage() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.THEME) || 'null');
+        if (!saved) return;
+        if (saved.type === 'image' && saved.value) {
+          document.body.style.backgroundImage = `url('${saved.value}')`;
+        } else if (saved.type === 'color' && saved.value) {
+          document.body.style.backgroundImage = 'none';
+          document.body.style.backgroundColor = saved.value;
+        }
+      } catch (e) {}
+    }
+
+    function applyPresetTheme(colorHex) {
+      document.body.style.backgroundImage = 'none';
+      document.body.style.backgroundColor = colorHex;
+      localStorage.setItem(STORAGE_KEYS.THEME, JSON.stringify({ type: 'color', value: colorHex }));
+      showToast('Tema warna latar berhasil diubah!');
+    }
+
+    function resetTheme() {
+      document.body.style.backgroundImage = 'none';
+      document.body.style.backgroundColor = '#F7F6F2';
+      localStorage.removeItem(STORAGE_KEYS.THEME);
+      showToast('Tema dikembalikan ke bawaan.');
+    }
+
+    function loadNotifSettings() {
+      try {
+        const cfg = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIF) || '{"enabled":false,"time":"19:30"}');
+        document.getElementById('notifEnabledToggle').checked = cfg.enabled;
+        document.getElementById('notifTimeInput').value = cfg.time || '19:30';
+        const dot = document.getElementById('notifDot');
+        if (cfg.enabled) dot.classList.remove('hidden');
+        else dot.classList.add('hidden');
+      } catch (e) {}
+    }
+
+    function saveNotifSettings() {
+      const enabled = document.getElementById('notifEnabledToggle').checked;
+      const time = document.getElementById('notifTimeInput').value || '19:30';
+      localStorage.setItem(STORAGE_KEYS.NOTIF, JSON.stringify({ enabled, time }));
+      loadNotifSettings();
+      if (enabled && 'Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+      closeModal('notifModal');
+      showToast(enabled ? `Pengingat aktif setiap pukul ${time} WIT` : 'Pengingat dimatikan.');
+    }
+
+    function testReminderSound() {
+      playCelebrationSound();
+      showToast('🔔 Pengingat 7 KAIH GEMINI CENDRAWASIH: Yuk lengkapi kebiasaan hari ini!');
+    }
+
+    function checkDailyReminder(wit) {
+      try {
+        const cfg = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIF) || 'null');
+        if (!cfg || !cfg.enabled || !appState.user) return;
+        const currentHHMM = `${String(wit.hours).padStart(2, '0')}:${String(wit.minutes).padStart(2, '0')}`;
+        if (currentHHMM === cfg.time && appState.lastNotifiedDate !== wit.dateKey && !isDayComplete(appState.records[wit.dateKey])) {
+          appState.lastNotifiedDate = wit.dateKey;
+          playCelebrationSound();
+          showToast(`⏰ Sudah pukul ${cfg.time} WIT! Jangan lupa isi 7 KAIH hari ini.`);
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Pengingat 7 KAIH — GEMINI CENDRAWASIH', {
+              body: `Halo ${appState.user.name}, jangan lupa menyelesaikan 7 kebiasaan hari ini!`
+            });
+          }
+        }
+      } catch (e) {}
+    }
+
+    // =========================================================
+    // 12. NAVIGASI LAYAR INTRO, LOGIN & INISIALISASI
+    // =========================================================
+    // 4. EFEK SUARA INTERAKSI (TONE.JS)
+    // =========================================================
+    async function playCheckSound(isChecked) {
+      try {
+        if (typeof Tone === 'undefined') return;
+        await Tone.start();
+        const synth = new Tone.Synth({
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.01, decay: 0.12, sustain: 0.05, release: 0.2 }
+        }).toDestination();
+        synth.volume.value = -8;
+        if (isChecked) {
+          synth.triggerAttackRelease('C5', '16n');
+          setTimeout(() => synth.triggerAttackRelease('G5', '16n'), 85);
+        } else {
+          synth.triggerAttackRelease('E4', '16n');
+        }
+      } catch (e) {}
+    }
+
+    async function playCelebrationSound() {
+      try {
+        if (typeof Tone === 'undefined') return;
+        await Tone.start();
+        const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        synth.volume.value = -6;
+        const notes = ['C5', 'E5', 'G5', 'C6'];
+        notes.forEach((n, idx) => {
+          setTimeout(() => synth.triggerAttackRelease(n, '8n'), idx * 120);
+        });
+      } catch (e) {}
+    }
+
+    // =========================================================
+    // 5. EFEK KEMBANG API PERAYAAN (SAAT 7/7 SELESAI)
+// ... existing code ... -->
+    // =========================================================
+    // 12. NAVIGASI LAYAR INTRO, LOGIN & INISIALISASI
+    // =========================================================
+    function enterFromIntro() {
+      document.getElementById('introScreen').classList.add('hidden');
+      if (appState.user) {
+        showMainDashboard();
+      } else {
+        document.getElementById('loginScreen').classList.remove('hidden');
+      }
+    }
+
+    function replayIntro() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('introScreen').classList.remove('hidden');
+    }
+
+    function showMainDashboard() {
+      document.getElementById('introScreen').classList.add('hidden');
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      initTodayDraft();
+      const avatarSrc = appState.user.avatar || AVATAR_PRESETS.putra;
+      document.getElementById('headerAvatar').src = avatarSrc;
+      switchTab('beranda');
+    }
+
+    function logoutAccount() {
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      appState.user = null;
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      showToast('Silakan masuk dengan akun siswa.');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAllStorage();
+      applyThemeFromStorage();
+      loadNotifSettings();
+      syncIndependentWITTime();
+      startLiveClockWIT();
+
+      document.getElementById('skipIntroBtn').addEventListener('click', enterFromIntro);
+      document.getElementById('enterAppBtn').addEventListener('click', enterFromIntro);
+
+      document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('studentNameInput').value.trim();
+        const className = document.getElementById('studentClassInput').value.trim();
+        if (!name || !className) return;
+
+        appState.user = {
+          name,
+          className,
+          avatar: AVATAR_PRESETS.putra
+        };
+        saveUserStorage();
+        showMainDashboard();
+        showToast(`Selamat datang, ${name}!`);
+      });
+
+      document.getElementById('editAccountForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('editNameInput').value.trim();
+        const className = document.getElementById('editClassInput').value.trim();
+        if (!name || !className) return;
+        appState.user.name = name;
+        appState.user.className = className;
+        saveUserStorage();
+        renderProfilAndLeaderboard();
+        renderBeranda();
+        showToast('Profil siswa berhasil diperbarui!');
+      });
+
+      document.getElementById('profileGalleryInput').addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const compressed = await compressImageFile(file, 260);
+        appState.user.avatar = compressed;
+        saveUserStorage();
+        renderProfilAndLeaderboard();
+        showToast('Foto profil dari galeri berhasil dipasang!');
+      });
+
+      document.getElementById('bgGalleryInput').addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const compressed = await compressImageFile(file, 1024);
+        document.body.style.backgroundImage = `url('${compressed}')`;
+        localStorage.setItem(STORAGE_KEYS.THEME, JSON.stringify({ type: 'image', value: compressed }));
+        showToast('Latar belakang dari galeri berhasil diterapkan!');
+      });
+
+      document.getElementById('saveTodayBtn').addEventListener('click', saveTodayHabits);
+      document.getElementById('periodFilterSelect').addEventListener('change', renderHabitPercentages);
+
+      document.querySelectorAll('.nav-btn, .nav-btn-mobile').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.nav));
+      });
+
+      window.addEventListener('resize', () => {
+        if (!document.getElementById('tab-perkembangan').classList.contains('hidden')) {
+          drawProgressChart();
+        }
+        if (!document.getElementById('tab-analisis').classList.contains('hidden')) {
+          renderAnalisisDashboard();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
